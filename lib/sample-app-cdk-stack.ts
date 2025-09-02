@@ -19,7 +19,21 @@ export class SampleAppCdkStack extends Stack {
       bundling: {
         minify: false,
         externalModules: [],
-        sourcesContent: false
+        sourcesContent: false,
+        commandHooks: {
+          beforeBundling(_inputDir: string, _outputDir: string): string[] {
+            return [];
+          },
+          beforeInstall(_inputDir: string, _outputDir: string): string[] {
+            return [];
+          },
+          afterBundling(inputDir: string, outputDir: string): string[] {
+            // Ensure package-lock.json from the repo root is included in the Lambda artifact
+            return [
+              `bash -lc "if [ -f ${inputDir}/package-lock.json ]; then cp ${inputDir}/package-lock.json ${outputDir}/package-lock.json; fi"`
+            ];
+          }
+        }
       }
     } as const;
 
