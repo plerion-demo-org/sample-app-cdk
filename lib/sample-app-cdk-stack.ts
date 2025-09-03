@@ -1,4 +1,4 @@
-import { Stack, StackProps, Tags, Duration, aws_lambda as lambda } from 'aws-cdk-lib';
+import { Stack, StackProps, Tags, Duration, aws_lambda as lambda, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
@@ -40,11 +40,24 @@ export class SampleAppCdkStack extends Stack {
       }
     } as const;
 
-    new NodejsFunction(this, 'LambdaA', {
+    const lambdaA = new NodejsFunction(this, 'LambdaA', {
       ...commonFnProps,
       functionName: `${prefix}lambda-a`,
       entry: path.join(__dirname, '..', 'src', 'lambda-a', 'index.ts'),
       handler: 'handler'
+    });
+
+    const lambdaAUrl = lambdaA.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE,
+      cors: {
+        allowedOrigins: ['*'],
+        allowedMethods: [lambda.HttpMethod.ALL]
+      }
+    });
+
+    new CfnOutput(this, 'LambdaAFunctionUrl', {
+      value: lambdaAUrl.url,
+      description: 'Public Function URL for pd-lambda-a'
     });
 
     new NodejsFunction(this, 'LambdaB', {
