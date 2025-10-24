@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "engines": {
-    "node": ">=22 <23"
+    "node": ">=22 <24"
   },
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc",
     "cdk": "cdk",
     "synth": "cdk synth",
     "deploy": "cdk deploy --require-approval never",

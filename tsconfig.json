@@ -10,7 +10,6 @@
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": ["bin", "lib", "src"]
+  "include": ["bin", "lib", "src"],
+  "exclude": ["node_modules"]
 }
-
-
