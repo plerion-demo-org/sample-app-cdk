@@ -1,0 +1,50 @@
+name: Plerion – Upload IaC artifact
+
+on:
+  pull_request:
+
+concurrency:
+  group: plerion-iac-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  synth-and-upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (22)
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm i; fi
+
+      - name: CDK synth
+        run: |
+          npx cdk synth --quiet --output cdk.out
+
+      - name: Build manifest
+        shell: bash
+        run: |
+          rm -rf templates && mkdir -p templates
+          find cdk.out -type f -name '*.template.json' -exec cp {} templates/ \;
+          echo "Prepared $(ls -1 templates | wc -l) templates for upload"
+
+      - name: Upload Plerion IaC artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CDK Stack
+          path: |
+            templates/*.template.json
+          if-no-files-found: error
+          retention-days: 3
